@@ -15,6 +15,10 @@
 
 访问 [星痕共鸣内鬼翻译器](https://phiyuki.github.io/BPSR-translate/) 即可在线使用。
 
+### 个性化
+
+修改**PHRASES**、**KEY**、**SALT**和**VERSION**内的内容。
+
 ## 加密原理
 
 使用多层加密技术：
