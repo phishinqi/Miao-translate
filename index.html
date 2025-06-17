@@ -267,13 +267,13 @@
             }
         }
 
-        // 星痕共鸣特有的加密消息函数 - 使用随机零宽字符分段
+        // 加密消息函数
         function encryptMessage(message) {
             try {
-                // 1. 使用星痕共鸣特有的混淆函数处理原始消息
+                // 1. 使用混淆函数处理原始消息
                 const scrambledMessage = starResonanceScramble(message, KEY, SALT);
                 
-                // 2. 创建项目特有的Base64到零宽字符的映射
+                // 2. 创建Base64到零宽字符的映射
                 const b64ToZwMap = createBase64ToZeroWidthMap();
                 
                 // 3. 将混淆后的消息转为Base64
@@ -285,32 +285,25 @@
                     zeroWidthMessage += b64ToZwMap[base64Message[i]];
                 }
                 
-                // 5. 使用随机分段策略，在零宽字符中插入星痕共鸣词组和标点
+                // 5. 使用随机分段策略，在零宽字符中插入词组和标点
                 let result = "";
-                // 添加开头的星痕共鸣
                 result += PHRASES[0];
                 result += PUNCTUATIONS[0];
                 
-                // 使用真正的随机数生成器
+                // 使用随机数生成器
                 const getNextRandom = () => {
                     return Math.random();
                 };
                 
-                // 将零宽字符随机分段，每段之间插入星痕共鸣
                 let currentPosition = 0;
                 while (currentPosition < zeroWidthMessage.length) {
-                    // 随机决定当前段的长度 (10-30之间的随机值)
                     const randomValue = getNextRandom();
                     const segmentLength = Math.floor(10 + randomValue * 20);
-                    
-                    // 提取当前段
                     const endPosition = Math.min(currentPosition + segmentLength, zeroWidthMessage.length);
                     const segment = zeroWidthMessage.substring(currentPosition, endPosition);
                     result += segment;
                     
-                    // 如果还有更多字符，添加星痕共鸣词组和标点
                     if (endPosition < zeroWidthMessage.length) {
-                        // 随机选择词组和标点
                         const phraseIndex = Math.floor(getNextRandom() * PHRASES.length);
                         const punctIndex = Math.floor(getNextRandom() * PUNCTUATIONS.length);
                         
@@ -321,7 +314,6 @@
                     currentPosition = endPosition;
                 }
                 
-                // 添加结尾的星痕共鸣
                 result += PHRASES[0];
                 
                 return result;
@@ -331,10 +323,10 @@
             }
         }
 
-        // 星痕共鸣特有的解密消息函数 - 适应随机分段
+        // 解密消息函数
         function decryptMessage(encryptedMessage) {
             try {
-                // 1. 创建项目特有的Base64到零宽字符的映射
+                // 1. 创建Base64到零宽字符的映射
                 const b64ToZwMap = createBase64ToZeroWidthMap();
                 // 创建反向映射
                 const zwToB64Map = {};
@@ -342,11 +334,11 @@
                     zwToB64Map[value] = key;
                 }
                 
-                // 2. 提取所有零宽字符 - 移除所有可见字符
+                // 2. 提取所有零宽字符
                 const zeroWidthCharsRegex = new RegExp(`[^${ZERO_WIDTH_CHARS.join('')}]`, 'g');
                 const zeroWidthOnly = encryptedMessage.replace(zeroWidthCharsRegex, '');
                 
-                // 3. 将零宽字符转回Base64 - 每6个零宽字符代表一个Base64字符
+                // 3. 将零宽字符转回Base64
                 let base64Message = "";
                 for (let i = 0; i < zeroWidthOnly.length; i += 6) {
                     if (i + 6 <= zeroWidthOnly.length) {
@@ -373,7 +365,7 @@
                     scrambledMessage = decoder.decode(new Uint8Array(bytes));
                 }
                 
-                // 5. 使用星痕共鸣特有的解混淆函数还原原始消息
+                // 5. 使用解混淆函数还原原始消息
                 return starResonanceUnscramble(scrambledMessage, KEY, SALT);
             } catch (e) {
                 console.error("解密错误详情:", e);
@@ -496,7 +488,7 @@
                 const testMessage = "测试消息123";
                 
                 try {
-                    // 直接测试星痕共鸣特有的混淆函数
+                    // 直接测试混淆函数
                     const scrambled = starResonanceScramble(testMessage, KEY, SALT);
                     info += `原始消息: "${testMessage}"\n`;
                     info += `混淆后: "${scrambled}"\n`;
@@ -552,6 +544,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 
