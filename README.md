@@ -1,4 +1,4 @@
-# BPSR-translate
+# Miao-translate
 
 ## 项目简介
 
