@@ -519,15 +519,21 @@
 
         // 配置管理函数
         function loadConfig() {
+            console.log('开始加载配置...');
             const savedConfig = localStorage.getItem('miao-config');
+            console.log('从localStorage读取的配置:', savedConfig);
             if (savedConfig) {
                 try {
                     const parsed = JSON.parse(savedConfig);
+                    console.log('解析后的配置:', parsed);
                     CONFIG = { ...DEFAULT_CONFIG, ...parsed };
+                    console.log('合并后的CONFIG:', CONFIG);
                     updateVariables();
                 } catch (e) {
-                    console.warn('配置加载失败，使用默认配置');
+                    console.warn('配置加载失败，使用默认配置:', e);
                 }
+            } else {
+                console.log('没有找到保存的配置，使用默认配置');
             }
         }
 
@@ -542,6 +548,7 @@
             VERSION = CONFIG.VERSION;
             PHRASES = [...CONFIG.PHRASES];
             PUNCTUATIONS = [...CONFIG.PUNCTUATIONS];
+            console.log('配置已更新:', { KEY, SALT, VERSION, PHRASES, PUNCTUATIONS });
         }
 
         function resetConfig() {
@@ -790,9 +797,8 @@
             for (let i = 0; i < wordsNeeded; i++) {
                 // 只在开头和中间添加少量喵语词
                 if (i === 0 || i === Math.floor(wordsNeeded / 2) || i === wordsNeeded - 1) {
-                    // 使用最短的喵语词
-                    const shortPhrases = ["喵", "喵~"];
-                    const phrase = shortPhrases[Math.floor(getNextRandom() * shortPhrases.length)];
+                    // 使用配置中的喵语词
+                    const phrase = PHRASES[Math.floor(getNextRandom() * PHRASES.length)];
                     result += phrase;
                 }
 
@@ -811,7 +817,9 @@
 
                 // 减少标点符号的使用，只在必要时添加
                 if (i === Math.floor(wordsNeeded / 2) && wordsNeeded > 2) {
-                    result += "，"; // 只在中间添加一个逗号
+                    // 使用配置中的标点符号
+                    const punctuation = PUNCTUATIONS[Math.floor(getNextRandom() * PUNCTUATIONS.length)];
+                    result += punctuation;
                 }
             }
 
@@ -823,8 +831,9 @@
                 result += zeroWidthMessage.substring(remainingStart, remainingEnd);
             }
 
-            // 简化结尾，只添加一个句号
-            result += "。";
+            // 添加结尾标点符号
+            const endPunctuation = PUNCTUATIONS[Math.floor(getNextRandom() * PUNCTUATIONS.length)];
+            result += endPunctuation;
 
             console.log(`生成的喵语文本长度: ${result.length}, 处理的零宽字符组合: ${zwIndex}/${completeComboCount}`);
 
@@ -1072,8 +1081,10 @@
             }
         });
 
-        // 加载保存的配置
-        loadConfig();
+        // 确保DOM完全加载后再加载配置
+        document.addEventListener('DOMContentLoaded', function() {
+            loadConfig();
+        });
 
         // 配置对话框事件监听器
         const configModal = document.getElementById('config-modal');
@@ -1107,7 +1118,11 @@
 
         // 保存配置
         configSave.addEventListener('click', function() {
-            CONFIG = getConfigFromUI();
+            console.log('保存配置前:', CONFIG);
+            const newConfig = getConfigFromUI();
+            console.log('从UI获取的新配置:', newConfig);
+            CONFIG = newConfig;
+            console.log('更新后的CONFIG:', CONFIG);
             saveConfig();
             configModal.style.display = 'none';
             alert('配置已保存！');
@@ -1206,11 +1221,13 @@
                 // 收集调试信息
                 let info = "";
                 
-                // 1. 显示关键参数
+                // 1. 显示关键参数（显示当前实际使用的配置）
                 info += "=== 关键参数 ===\n";
-                info += `VERSION: ${VERSION}\n`;
-                info += `KEY: ${KEY}\n`;
-                info += `SALT: ${SALT}\n\n`;
+                info += `VERSION: ${CONFIG.VERSION}\n`;
+                info += `KEY: ${CONFIG.KEY}\n`;
+                info += `SALT: ${CONFIG.SALT}\n`;
+                info += `PHRASES: [${CONFIG.PHRASES.join(', ')}]\n`;
+                info += `PUNCTUATIONS: [${CONFIG.PUNCTUATIONS.join(', ')}]\n\n`;
                 
                 // 2. 测试零宽字符映射一致性
                 info += "=== 零宽字符映射一致性测试 ===\n";
@@ -1236,8 +1253,8 @@
                 const testMessage = "测试消息123";
 
                 try {
-                    // 直接测试混淆函数
-                    const scrambled = starResonanceScramble(testMessage, KEY, SALT);
+                    // 直接测试混淆函数（使用当前配置）
+                    const scrambled = starResonanceScramble(testMessage, CONFIG.KEY, CONFIG.SALT);
                     info += `原始消息: "${testMessage}" (长度: ${testMessage.length})\n`;
                     info += `混淆后长度: ${scrambled.length}\n`;
                     info += `混淆后预览: "${scrambled.substring(0, 30)}${scrambled.length > 30 ? '...' : ''}"\n`;
@@ -1266,7 +1283,7 @@
                     info += `字符分布 - ASCII: ${charTypes.ascii}, 中文: ${charTypes.chinese}, 特殊: ${charTypes.special}, 控制: ${charTypes.control}\n`;
 
                     try {
-                        const unscrambled = starResonanceUnscramble(scrambled, KEY, SALT);
+                        const unscrambled = starResonanceUnscramble(scrambled, CONFIG.KEY, CONFIG.SALT);
                         info += `解混淆后: "${unscrambled}" (长度: ${unscrambled.length})\n`;
                         info += `一致性: ${testMessage === unscrambled ? '✓ 正常' : '✗ 错误'}\n`;
 
