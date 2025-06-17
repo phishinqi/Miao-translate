@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星痕共鸣内鬼翻译器</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 2px solid #ddd;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            border-bottom: 2px solid #3498db;
+            color: #3498db;
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+            border-left: 4px solid #3498db;
+        }
+        .copy-btn {
+            background-color: #2ecc71;
+            margin-left: 10px;
+        }
+        .copy-btn:hover {
+            background-color: #27ae60;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>星痕共鸣内鬼翻译器</h1>
+        
+        <div class="tabs">
+            <div class="tab active" id="encrypt-tab">加密</div>
+            <div class="tab" id="decrypt-tab">解密</div>
+        </div>
+        
+        <div id="encrypt-panel">
+            <textarea id="encrypt-input" placeholder="请输入要加密的文本..."></textarea>
+            <button id="encrypt-btn">加密</button>
+            
+            <div class="result" id="encrypt-result" style="display: none;">
+                <h3>加密结果：</h3>
+                <p id="encrypt-output"></p>
+                <button id="copy-encrypt" class="copy-btn">复制结果</button>
+            </div>
+        </div>
+        
+        <div id="decrypt-panel" style="display: none;">
+            <textarea id="decrypt-input" placeholder="请输入要解密的文本..."></textarea>
+            <button id="decrypt-btn">解密</button>
+            
+            <div class="result" id="decrypt-result" style="display: none;">
+                <h3>解密结果：</h3>
+                <p id="decrypt-output"></p>
+                <button id="copy-decrypt" class="copy-btn">复制结果</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>星痕共鸣内鬼翻译器 &copy; 2025</p>
+    </div>
+
+    <script>
+        // 零宽字符集
+        const ZERO_WIDTH_CHARS = [
+            '\u200b',
+            '\u200c',
+            '\u200d',
+            '\u2060',
+            '\u200e',
+            '\u200f',
+            '\ufeff',
+        ];
+
+        const PHRASES = [
+            "星痕共鸣", "羁绊有爱", "共鸣无限"
+        ];
+
+        const PUNCTUATIONS = ["，", "。", "、", "！", "？", "：", "；", "　"];
+
+        const KEY = "BLUEPROTOCOLv1.08.001";
+
+        const SALT = "U2FsdGVkX1+jPd1XxgUNHOXC";
+        
+        const VERSION = "BPSR114514";
+
+        // 创建Base64字符到零宽字符组合的映射
+        function createBase64ToZeroWidthMap() {
+            const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+            const mapping = {};
+            
+            // 生成一个伪随机序列，用于打乱映射关系
+            const seedValue = Array.from(KEY).reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            let randomSeed = seedValue;
+            
+            const getNextRandom = () => {
+                randomSeed = (randomSeed * 9301 + 49297) % 233280;
+                return randomSeed / 233280;
+            };
+            
+            // 为每个Base64字符创建唯一的零宽字符组合
+            for (let i = 0; i < base64Chars.length; i++) {
+                const char = base64Chars[i];
+                
+                const randomValue = getNextRandom();
+                const binaryLength = 6; // 足够表示64个字符
+                let binary = i.toString(2).padStart(binaryLength, '0');
+                
+                // 根据随机值决定是否反转二进制表示
+                if (randomValue > 0.5) {
+                    binary = binary.split('').reverse().join('');
+                }
+                
+                let zeroWidthCombo = "";
+                for (let j = 0; j < binary.length; j++) {
+                    // 使用密钥的字符来决定使用哪些零宽字符
+                    const keyIndex = (i + j) % KEY.length;
+                    const keyChar = KEY.charCodeAt(keyIndex);
+                    const zwIndex = (binary[j] === '0') ? keyChar % 3 : 3 + (keyChar % 4);
+                    zeroWidthCombo += ZERO_WIDTH_CHARS[zwIndex % ZERO_WIDTH_CHARS.length];
+                }
+                
+                mapping[char] = zeroWidthCombo;
+            }
+            
+            return mapping;
+        }
+
+        // 混淆函数
+        function starResonanceScramble(str, key, salt) {
+            try {
+                // 1. 将输入字符串与盐值组合
+                const saltedInput = str + ":" + salt;
+                
+                // 2. 使用密钥的特征值进行额外处理
+                let result = '';
+                const keyChars = Array.from(key);
+                const keySum = keyChars.reduce((sum, char) => sum + char.charCodeAt(0), 0);
+                
+                for (let i = 0; i < saltedInput.length; i++) {
+                    const charCode = saltedInput.charCodeAt(i);
+                    const keyChar = key.charCodeAt(i % key.length);
+                    const xorResult = charCode ^ keyChar;
+                    
+                    // 根据位置和密钥特征值进行偏移
+                    const offset = (i % 3 === 0) ? (keySum % 7) : ((i % 3 === 1) ? -(keySum % 5) : (keySum % 3));
+                    const finalCharCode = (xorResult + offset + 65536) % 65536; // 确保在有效Unicode范围内
+                    
+                    result += String.fromCharCode(finalCharCode);
+                }
+                
+                // 3. 添加版本标记
+                return VERSION + ":" + result;
+            } catch (e) {
+                console.error("混淆过程中出错:", e);
+                throw e;
+            }
+        }
+
+        // 解混淆函数
+        function starResonanceUnscramble(scrambled, key, salt) {
+            try {
+                // 1. 验证并移除版本标记
+                if (!scrambled.startsWith(VERSION + ":")) {
+                    console.error("版本标记不匹配:", scrambled.substring(0, 20));
+                    throw new Error("无效的加密格式或版本不匹配");
+                }
+                
+                const dataWithoutVersion = scrambled.substring(VERSION.length + 1);
+                
+                // 2. 反向应用额外处理
+                let result = '';
+                const keyChars = Array.from(key);
+                const keySum = keyChars.reduce((sum, char) => sum + char.charCodeAt(0), 0);
+                
+                for (let i = 0; i < dataWithoutVersion.length; i++) {
+                    // 反向应用额外处理
+                    const charCode = dataWithoutVersion.charCodeAt(i);
+                    const offset = (i % 3 === 0) ? (keySum % 7) : ((i % 3 === 1) ? -(keySum % 5) : (keySum % 3));
+                    const unshiftedCharCode = (charCode - offset + 65536) % 65536; // 确保在有效Unicode范围内
+                    
+                    // XOR解密
+                    const keyChar = key.charCodeAt(i % key.length);
+                    const originalCharCode = unshiftedCharCode ^ keyChar;
+                    
+                    result += String.fromCharCode(originalCharCode);
+                }
+                
+                // 3. 移除盐值
+                const saltIndex = result.lastIndexOf(":" + salt);
+                if (saltIndex === -1) {
+                    console.error("无法找到盐值标记");
+                    
+                    const lastColonIndex = result.lastIndexOf(":");
+                    if (lastColonIndex !== -1) {
+                        console.log("尝试使用最后一个冒号作为分隔点");
+                        return result.substring(0, lastColonIndex);
+                    }
+                    
+                    throw new Error("解密失败：无效的数据格式");
+                }
+                
+                return result.substring(0, saltIndex);
+            } catch (e) {
+                console.error("解混淆过程中出错:", e);
+                throw e;
+            }
+        }
+
+        // 星痕共鸣特有的加密消息函数 - 使用随机零宽字符分段
+        function encryptMessage(message) {
+            try {
+                // 1. 使用星痕共鸣特有的混淆函数处理原始消息
+                const scrambledMessage = starResonanceScramble(message, KEY, SALT);
+                
+                // 2. 创建项目特有的Base64到零宽字符的映射
+                const b64ToZwMap = createBase64ToZeroWidthMap();
+                
+                // 3. 将混淆后的消息转为Base64
+                const base64Message = btoa(unescape(encodeURIComponent(scrambledMessage)));
+                
+                // 4. 将Base64转为零宽字符
+                let zeroWidthMessage = "";
+                for (let i = 0; i < base64Message.length; i++) {
+                    zeroWidthMessage += b64ToZwMap[base64Message[i]];
+                }
+                
+                // 5. 使用随机分段策略，在零宽字符中插入星痕共鸣词组和标点
+                let result = "";
+                // 添加开头的星痕共鸣
+                result += PHRASES[0];
+                result += PUNCTUATIONS[0];
+                
+                // 使用真正的随机数生成器
+                const getNextRandom = () => {
+                    return Math.random();
+                };
+                
+                // 将零宽字符随机分段，每段之间插入星痕共鸣
+                let currentPosition = 0;
+                while (currentPosition < zeroWidthMessage.length) {
+                    // 随机决定当前段的长度 (10-30之间的随机值)
+                    const randomValue = getNextRandom();
+                    const segmentLength = Math.floor(10 + randomValue * 20);
+                    
+                    // 提取当前段
+                    const endPosition = Math.min(currentPosition + segmentLength, zeroWidthMessage.length);
+                    const segment = zeroWidthMessage.substring(currentPosition, endPosition);
+                    result += segment;
+                    
+                    // 如果还有更多字符，添加星痕共鸣词组和标点
+                    if (endPosition < zeroWidthMessage.length) {
+                        // 随机选择词组和标点
+                        const phraseIndex = Math.floor(getNextRandom() * PHRASES.length);
+                        const punctIndex = Math.floor(getNextRandom() * PUNCTUATIONS.length);
+                        
+                        result += PHRASES[phraseIndex];
+                        result += PUNCTUATIONS[punctIndex];
+                    }
+                    
+                    currentPosition = endPosition;
+                }
+                
+                // 添加结尾的星痕共鸣
+                result += PHRASES[0];
+                
+                return result;
+            } catch (e) {
+                console.error("加密过程中出错:", e);
+                throw new Error(`加密失败: ${e.message}`);
+            }
+        }
+
+        // 星痕共鸣特有的解密消息函数 - 适应随机分段
+        function decryptMessage(encryptedMessage) {
+            try {
+                // 1. 创建项目特有的Base64到零宽字符的映射
+                const b64ToZwMap = createBase64ToZeroWidthMap();
+                // 创建反向映射
+                const zwToB64Map = {};
+                for (const [key, value] of Object.entries(b64ToZwMap)) {
+                    zwToB64Map[value] = key;
+                }
+                
+                // 2. 提取所有零宽字符 - 移除所有可见字符
+                const zeroWidthCharsRegex = new RegExp(`[^${ZERO_WIDTH_CHARS.join('')}]`, 'g');
+                const zeroWidthOnly = encryptedMessage.replace(zeroWidthCharsRegex, '');
+                
+                // 3. 将零宽字符转回Base64 - 每6个零宽字符代表一个Base64字符
+                let base64Message = "";
+                for (let i = 0; i < zeroWidthOnly.length; i += 6) {
+                    if (i + 6 <= zeroWidthOnly.length) {
+                        const zwCombo = zeroWidthOnly.substring(i, i + 6);
+                        if (zwCombo in zwToB64Map) {
+                            base64Message += zwToB64Map[zwCombo];
+                        }
+                    }
+                }
+                
+                // 4. 将Base64解码回混淆后的消息
+                let scrambledMessage;
+                try {
+                    const decodedData = atob(base64Message);
+                    scrambledMessage = decodeURIComponent(escape(decodedData));
+                } catch (e) {
+                    // 备用解码方法，处理非ASCII字符
+                    const bytes = [];
+                    const decodedData = atob(base64Message);
+                    for (let i = 0; i < decodedData.length; i++) {
+                        bytes.push(decodedData.charCodeAt(i));
+                    }
+                    const decoder = new TextDecoder('utf-8');
+                    scrambledMessage = decoder.decode(new Uint8Array(bytes));
+                }
+                
+                // 5. 使用星痕共鸣特有的解混淆函数还原原始消息
+                return starResonanceUnscramble(scrambledMessage, KEY, SALT);
+            } catch (e) {
+                console.error("解密错误详情:", e);
+                throw new Error(`解密失败: ${e.message}`);
+            }
+        }
+
+        // 切换标签页
+        document.getElementById('encrypt-tab').addEventListener('click', function() {
+            this.classList.add('active');
+            document.getElementById('decrypt-tab').classList.remove('active');
+            document.getElementById('encrypt-panel').style.display = 'block';
+            document.getElementById('decrypt-panel').style.display = 'none';
+        });
+
+        document.getElementById('decrypt-tab').addEventListener('click', function() {
+            this.classList.add('active');
+            document.getElementById('encrypt-tab').classList.remove('active');
+            document.getElementById('decrypt-panel').style.display = 'block';
+            document.getElementById('encrypt-panel').style.display = 'none';
+        });
+
+        // 加密按钮点击事件
+        document.getElementById('encrypt-btn').addEventListener('click', function() {
+            const input = document.getElementById('encrypt-input').value;
+            if (!input) {
+                alert('请输入要加密的文本');
+                return;
+            }
+            
+            try {
+                const encrypted = encryptMessage(input);
+                document.getElementById('encrypt-output').textContent = encrypted;
+                document.getElementById('encrypt-result').style.display = 'block';
+            } catch (e) {
+                alert(`加密失败: ${e.message}`);
+            }
+        });
+
+        // 解密按钮点击事件
+        document.getElementById('decrypt-btn').addEventListener('click', function() {
+            const input = document.getElementById('decrypt-input').value;
+            if (!input) {
+                alert('请输入要解密的文本');
+                return;
+            }
+            
+            try {
+                const decrypted = decryptMessage(input);
+                document.getElementById('decrypt-output').textContent = decrypted;
+                document.getElementById('decrypt-result').style.display = 'block';
+            } catch (e) {
+                alert(`解密失败: ${e.message}`);
+            }
+        });
+
+        // 复制加密结果
+        document.getElementById('copy-encrypt').addEventListener('click', function() {
+            const text = document.getElementById('encrypt-output').textContent;
+            navigator.clipboard.writeText(text).then(function() {
+                alert('已复制到剪贴板');
+            }, function() {
+                alert('复制失败，请手动复制');
+            });
+        });
+
+        // 复制解密结果
+        document.getElementById('copy-decrypt').addEventListener('click', function() {
+            const text = document.getElementById('decrypt-output').textContent;
+            navigator.clipboard.writeText(text).then(function() {
+                alert('已复制到剪贴板');
+            }, function() {
+                alert('复制失败，请手动复制');
+            });
+        });
+
+        // 添加调试按钮和面板
+        document.querySelector('.container').insertAdjacentHTML('beforeend', `
+            <div class="debug-panel" style="margin-top: 30px; border-top: 1px solid #ddd; padding-top: 20px;">
+                <h3>调试工具</h3>
+                <button id="debug-btn" style="background-color: #e74c3c;">显示调试信息</button>
+                <div id="debug-info" style="display: none; margin-top: 15px; padding: 15px; background-color: #f8f9fa; border-radius: 4px; font-family: monospace; white-space: pre-wrap; overflow-x: auto;"></div>
+            </div>
+        `);
+
+        // 调试按钮点击事件
+        document.getElementById('debug-btn').addEventListener('click', async function() {
+            const debugInfo = document.getElementById('debug-info');
+            if (debugInfo.style.display === 'none') {
+                // 收集调试信息
+                let info = "";
+                
+                // 1. 显示关键参数
+                info += "=== 关键参数 ===\n";
+                info += `VERSION: ${VERSION}\n`;
+                info += `KEY: ${KEY}\n`;
+                info += `SALT: ${SALT}\n\n`;
+                
+                // 2. 测试零宽字符映射一致性
+                info += "=== 零宽字符映射一致性测试 ===\n";
+                const testChar = 'A';
+                const b64ToZwMap = createBase64ToZeroWidthMap();
+                const zwEncoded = b64ToZwMap[testChar];
+                
+                // 创建反向映射
+                const zwToB64Map = {};
+                for (const [key, value] of Object.entries(b64ToZwMap)) {
+                    zwToB64Map[value] = key;
+                }
+                
+                const b64Decoded = zwToB64Map[zwEncoded];
+                
+                info += `测试字符: '${testChar}'\n`;
+                info += `编码为零宽字符: [${Array.from(zwEncoded).map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join(', ')}]\n`;
+                info += `解码回Base64: '${b64Decoded}'\n`;
+                info += `映射一致性: ${testChar === b64Decoded ? '✓ 正常' : '✗ 错误'}\n\n`;
+                
+                // 3. 测试加密解密一致性
+                info += "=== 加密解密一致性测试 ===\n";
+                const testMessage = "测试消息123";
+                
+                try {
+                    // 直接测试星痕共鸣特有的混淆函数
+                    const scrambled = starResonanceScramble(testMessage, KEY, SALT);
+                    info += `原始消息: "${testMessage}"\n`;
+                    info += `混淆后: "${scrambled}"\n`;
+                    
+                    try {
+                        const unscrambled = starResonanceUnscramble(scrambled, KEY, SALT);
+                        info += `解混淆后: "${unscrambled}"\n`;
+                        info += `一致性: ${testMessage === unscrambled ? '✓ 正常' : '✗ 错误'}\n\n`;
+                    } catch (e) {
+                        info += `解混淆失败: ${e.message}\n\n`;
+                    }
+                    
+                    // 测试完整的加密解密流程，包括随机分段
+                    info += "--- 完整加密解密流程测试（随机分段）---\n";
+                    
+                    // 加密同一消息两次，确保有足够的时间差
+                    const encrypted1 = encryptMessage(testMessage);
+                    
+                    // 等待一小段时间，确保两次加密使用不同的随机种子
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    
+                    const encrypted2 = encryptMessage(testMessage);
+                    
+                    info += `加密结果1: "${encrypted1.substring(0, 50)}${encrypted1.length > 50 ? '...' : ''}"\n`;
+                    info += `加密结果2: "${encrypted2.substring(0, 50)}${encrypted2.length > 50 ? '...' : ''}"\n`;
+                    info += `加密结果不同: ${encrypted1 !== encrypted2 ? '✓ 正常' : '✗ 错误'}\n\n`;
+                    
+                    // 测试解密
+                    try {
+                        const decrypted1 = decryptMessage(encrypted1);
+                        info += `解密结果1: "${decrypted1}"\n`;
+                        info += `一致性1: ${testMessage === decrypted1 ? '✓ 正常' : '✗ 错误'}\n`;
+                        
+                        const decrypted2 = decryptMessage(encrypted2);
+                        info += `解密结果2: "${decrypted2}"\n`;
+                        info += `一致性2: ${testMessage === decrypted2 ? '✓ 正常' : '✗ 错误'}\n`;
+                    } catch (e) {
+                        info += `解密失败: ${e.message}\n`;
+                    }
+                } catch (e) {
+                    info += `测试过程出错: ${e.message}\n`;
+                }
+                
+                // 显示调试信息
+                debugInfo.textContent = info;
+                debugInfo.style.display = 'block';
+                this.textContent = '隐藏调试信息';
+            } else {
+                debugInfo.style.display = 'none';
+                this.textContent = '显示调试信息';
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
