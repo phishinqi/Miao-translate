@@ -139,17 +139,7 @@
         #debug-btn:hover {
             background-color: #c0392b;
         }
-        #debug-info {
-            display: none;
-            margin-top: 15px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            overflow-x: auto;
-            border: 1px solid #e9ecef;
-        }
+
 
         /* 配置对话框样式 */
         .config-modal {
@@ -362,11 +352,7 @@
             background-color: #2c3e50;
             border-left: 4px solid #3498db;
         }
-        body.dark-theme #debug-info {
-            background-color: #2c3e50;
-            color: #e0e0e0;
-            border: 1px solid #555555;
-        }
+
 
         /* 深色主题下的配置对话框 */
         body.dark-theme .config-modal-content {
@@ -445,6 +431,148 @@
             background-color: #f0fdf4;
             border-left: 4px solid #22c55e;
         }
+
+        /* 新的调试面板样式 */
+        .debug-controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .debug-controls button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        .debug-controls button:hover {
+            background-color: #2980b9;
+        }
+        .debug-controls button:active {
+            background-color: #1f5f8b;
+        }
+        #clear-debug-btn {
+            background-color: #e74c3c !important;
+        }
+        #clear-debug-btn:hover {
+            background-color: #c0392b !important;
+        }
+
+        /* 不同主题下的调试按钮 */
+        body.pink-theme .debug-controls button {
+            background-color: #ec4899;
+        }
+        body.pink-theme .debug-controls button:hover {
+            background-color: #db2777;
+        }
+        body.pink-theme .debug-controls button:active {
+            background-color: #be185d;
+        }
+
+        body.green-theme .debug-controls button {
+            background-color: #22c55e;
+        }
+        body.green-theme .debug-controls button:hover {
+            background-color: #16a34a;
+        }
+        body.green-theme .debug-controls button:active {
+            background-color: #15803d;
+        }
+
+        body.dark-theme .debug-controls button {
+            background-color: #4a90e2;
+        }
+        body.dark-theme .debug-controls button:hover {
+            background-color: #357abd;
+        }
+        body.dark-theme .debug-controls button:active {
+            background-color: #2563eb;
+        }
+        /* 调试面板基础样式和主题适配 */
+
+        /* 默认主题 */
+        .debug-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+        .debug-section h4 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        .debug-section pre {
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 0;
+            background-color: #ffffff;
+            color: #333333;
+            padding: 10px;
+            border: 1px solid #e9ecef;
+            border-radius: 3px;
+        }
+        #mapping-test-status, #full-test-status {
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .status-success {
+            color: #27ae60;
+        }
+        .status-error {
+            color: #e74c3c;
+        }
+
+        /* 深色主题 */
+        body.dark-theme .debug-section {
+            background-color: #2c3e50;
+            border: 1px solid #555555;
+        }
+        body.dark-theme .debug-section h4 {
+            color: #ffffff;
+        }
+        body.dark-theme .debug-section pre {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+            border: 1px solid #555555;
+        }
+
+        /* 粉色主题 */
+        body.pink-theme .debug-section {
+            background-color: #fdf2f8;
+            border: 1px solid #f9a8d4;
+        }
+        body.pink-theme .debug-section h4 {
+            color: #be185d;
+        }
+        body.pink-theme .debug-section pre {
+            background-color: #ffffff;
+            color: #333333;
+            border: 1px solid #f9a8d4;
+        }
+
+        /* 绿色主题 */
+        body.green-theme .debug-section {
+            background-color: #f0fdf4;
+            border: 1px solid #86efac;
+        }
+        body.green-theme .debug-section h4 {
+            color: #15803d;
+        }
+        body.green-theme .debug-section pre {
+            background-color: #ffffff;
+            color: #333333;
+            border: 1px solid #86efac;
+        }
     </style>
 </head>
 <body>
@@ -454,6 +582,7 @@
         <button class="theme-btn" data-theme="pink">粉色</button>
         <button class="theme-btn" data-theme="green">绿色</button>
         <button class="theme-btn" id="config-btn-header" style="background-color: #f39c12;">⚙️</button>
+        <button class="theme-btn" id="clear-cache-btn" style="background-color: #e74c3c;" title="清除映射缓存">🗑️</button>
     </div>
 
     <div class="container">
@@ -567,7 +696,7 @@
             MAX_INPUT_LENGTH: 5000,  // 最大输入长度
             CHUNK_SIZE: 1000,        // 分块处理大小
             WARNING_LENGTH: 100,     // 降低警告长度阈值
-            ULTRA_COMPACT_MODE: true // 启用超紧凑模式
+            ULTRA_COMPACT_MODE: false // 禁用超紧凑模式，统一使用标准模式
         };
 
         // 当前配置（可以被用户修改）
@@ -648,59 +777,153 @@
             };
         }
 
-        // 修复的Base64字符到零宽字符组合的映射
+        // 全局映射表缓存，确保加密和解密使用相同的映射
+        let GLOBAL_MAPPING_CACHE = null;
+
+        // 清除映射缓存的函数（用于调试）
+        function clearMappingCache() {
+            GLOBAL_MAPPING_CACHE = null;
+            console.log('映射缓存已清除');
+        }
+
+        // 测试映射正确性的函数
+        function testMapping() {
+            console.log('=== 开始映射测试 ===');
+
+            // 创建映射
+            const mapping = createBase64ToZeroWidthMap();
+
+            // 创建反向映射
+            const reverseMapping = {};
+            for (const [key, value] of Object.entries(mapping)) {
+                reverseMapping[value] = key;
+            }
+
+            console.log(`正向映射数量: ${Object.keys(mapping).length}`);
+            console.log(`反向映射数量: ${Object.keys(reverseMapping).length}`);
+
+            // 测试前10个字符的往返转换
+            const testChars = "ABCDEFGHIJabcdefghij";
+            let allPassed = true;
+
+            for (let i = 0; i < testChars.length; i++) {
+                const char = testChars[i];
+                const zwCombo = mapping[char];
+                const backToChar = reverseMapping[zwCombo];
+
+                const passed = char === backToChar;
+                if (!passed) allPassed = false;
+
+                const comboDebug = Array.from(zwCombo).map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join('');
+                console.log(`测试 "${char}": ${char} -> ${comboDebug} -> "${backToChar}" ${passed ? '✓' : '✗'}`);
+            }
+
+            console.log(`=== 映射测试结果: ${allPassed ? '全部通过' : '存在问题'} ===`);
+            return allPassed;
+        }
+
+        // 测试完整加密解密流程的函数
+        function testFullEncryptDecrypt() {
+            console.log('=== 开始完整加密解密测试 ===');
+
+            const testMessage = "测试";
+            console.log(`测试消息: "${testMessage}"`);
+
+            try {
+                // 加密
+                const encrypted = encryptMessage(testMessage);
+                console.log(`加密结果长度: ${encrypted.length}`);
+
+                // 提取零宽字符
+                const zeroWidthCharsRegex = new RegExp(`[${ZERO_WIDTH_CHARS.join('')}]`, 'g');
+                const encryptedZwChars = encrypted.match(zeroWidthCharsRegex) || [];
+                console.log(`加密时生成的零宽字符数量: ${encryptedZwChars.length}`);
+                console.log(`前9个加密零宽字符:`);
+                for (let i = 0; i < Math.min(9, encryptedZwChars.length); i++) {
+                    const char = encryptedZwChars[i];
+                    const code = char.charCodeAt(0).toString(16).padStart(4, '0');
+                    console.log(`  [${i}] \\u${code}`);
+                }
+
+                // 解密
+                const decrypted = decryptMessage(encrypted);
+                console.log(`解密结果: "${decrypted}"`);
+
+                const success = testMessage === decrypted;
+                console.log(`=== 完整测试结果: ${success ? '✅ 成功' : '❌ 失败'} ===`);
+                return success;
+            } catch (e) {
+                console.error(`测试过程中出错: ${e.message}`);
+                return false;
+            }
+        }
+
+        // 使用3个零宽字符组合的Base64映射，确保足够的唯一组合
         function createBase64ToZeroWidthMap() {
+            // 如果已有缓存，直接返回
+            if (GLOBAL_MAPPING_CACHE) {
+                console.log(`使用缓存的映射表: ${Object.keys(GLOBAL_MAPPING_CACHE).length} 个映射`);
+                return GLOBAL_MAPPING_CACHE;
+            }
+
             const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
             const mapping = {};
 
-            // 使用2个零宽字符的组合
-            const COMBO_LENGTH = 2;
+            // 使用3个零宽字符的组合：7^3 = 343 种组合，远超65个Base64字符的需求
+            const zwChars = ZERO_WIDTH_CHARS;
+            const totalCombinations = zwChars.length * zwChars.length * zwChars.length;
 
-            // 为每个Base64字符创建唯一的零宽字符组合
+            console.log(`创建新映射: ${base64Chars.length} 个Base64字符, ${zwChars.length} 个零宽字符, ${totalCombinations} 种可能组合`);
+            console.log(`零宽字符列表:`, zwChars.map((c, i) => `[${i}] \\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`));
+
             for (let i = 0; i < base64Chars.length; i++) {
                 const char = base64Chars[i];
 
-                // 使用确定性算法生成唯一组合
-                const firstIndex = i % ZERO_WIDTH_CHARS.length;
-                const secondIndex = Math.floor(i / ZERO_WIDTH_CHARS.length) % ZERO_WIDTH_CHARS.length;
+                // 使用更均匀的三位数系统分配零宽字符组合
+                // 确保每个位置都能充分利用
+                const firstIndex = i % zwChars.length;
+                const secondIndex = Math.floor(i / zwChars.length) % zwChars.length;
+                const thirdIndex = Math.floor(i / (zwChars.length * zwChars.length)) % zwChars.length;
 
-                const zeroWidthCombo = ZERO_WIDTH_CHARS[firstIndex] + ZERO_WIDTH_CHARS[secondIndex];
+                const zeroWidthCombo = zwChars[firstIndex] + zwChars[secondIndex] + zwChars[thirdIndex];
                 mapping[char] = zeroWidthCombo;
-            }
 
-            // 验证映射的唯一性并修复冲突
-            const usedCombos = new Set();
-            const conflicts = [];
-
-            for (const [char, combo] of Object.entries(mapping)) {
-                if (usedCombos.has(combo)) {
-                    conflicts.push(char);
-                } else {
-                    usedCombos.add(combo);
+                if (i < 15) {
+                    const comboDebug = Array.from(zeroWidthCombo).map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join('');
+                    console.log(`[${i}] "${char}" -> [${firstIndex},${secondIndex},${thirdIndex}] -> ${comboDebug}`);
                 }
             }
 
-            // 修复冲突
-            for (let i = 0; i < conflicts.length; i++) {
-                const char = conflicts[i];
-                const charIndex = base64Chars.indexOf(char);
+            // 验证映射的唯一性
+            const reverseMapping = {};
+            let conflicts = 0;
 
-                // 使用不同的算法生成新的组合
-                let newCombo;
-                let attempts = 0;
-                do {
-                    const offset = attempts + 1;
-                    const firstIndex = (charIndex + offset) % ZERO_WIDTH_CHARS.length;
-                    const secondIndex = (charIndex + offset * 2) % ZERO_WIDTH_CHARS.length;
-                    newCombo = ZERO_WIDTH_CHARS[firstIndex] + ZERO_WIDTH_CHARS[secondIndex];
-                    attempts++;
-                } while (usedCombos.has(newCombo) && attempts < 10);
-
-                mapping[char] = newCombo;
-                usedCombos.add(newCombo);
+            for (const [char, combo] of Object.entries(mapping)) {
+                if (reverseMapping[combo]) {
+                    conflicts++;
+                    console.error(`映射冲突: "${char}" 和 "${reverseMapping[combo]}" 都映射到相同组合`);
+                } else {
+                    reverseMapping[combo] = char;
+                }
             }
 
-            console.log(`创建了 ${Object.keys(mapping).length} 个映射，冲突修复: ${conflicts.length}`);
+            if (conflicts > 0) {
+                throw new Error(`映射表存在 ${conflicts} 个冲突`);
+            }
+
+            console.log(`映射创建成功: ${Object.keys(mapping).length} 个映射，无冲突`);
+
+            // 测试前几个映射的反向查找
+            console.log(`测试反向映射:`);
+            for (let i = 0; i < Math.min(5, base64Chars.length); i++) {
+                const char = base64Chars[i];
+                const combo = mapping[char];
+                const reverseChar = reverseMapping[combo];
+                console.log(`  "${char}" -> ${Array.from(combo).map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join('')} -> "${reverseChar}" ${char === reverseChar ? '✓' : '✗'}`);
+            }
+
+            // 缓存映射表
+            GLOBAL_MAPPING_CACHE = mapping;
             return mapping;
         }
 
@@ -810,31 +1033,22 @@
             }
         }
 
-        // 超级优化的加密消息函数 - 最小化输出长度
+        // 统一的加密消息函数
         function encryptMessage(message) {
             try {
                 console.log(`开始加密消息: "${message}"`);
 
-                if (CONFIG.ULTRA_COMPACT_MODE) {
-                    // 超紧凑模式：跳过复杂的混淆，直接使用简单编码
-                    return encryptMessageUltraCompact(message);
-                }
-
-                // 1. 使用混淆函数处理原始消息
-                const scrambledMessage = starResonanceScramble(message, KEY, SALT);
-                console.log(`混淆后消息长度: ${scrambledMessage.length}`);
+                // 1. 简单的字符编码，不使用复杂的混淆
+                const encoded = btoa(unescape(encodeURIComponent(message + ":" + VERSION)));
+                console.log(`Base64编码: "${encoded}" (长度: ${encoded.length})`);
 
                 // 2. 创建Base64到零宽字符的映射
                 const b64ToZwMap = createBase64ToZeroWidthMap();
 
-                // 3. 将混淆后的消息转为Base64
-                const base64Message = btoa(unescape(encodeURIComponent(scrambledMessage)));
-                console.log(`Base64消息: "${base64Message}" (长度: ${base64Message.length})`);
-
-                // 4. 将Base64转为零宽字符
+                // 3. 将Base64转为零宽字符
                 let zeroWidthMessage = "";
-                for (let i = 0; i < base64Message.length; i++) {
-                    const b64Char = base64Message[i];
+                for (let i = 0; i < encoded.length; i++) {
+                    const b64Char = encoded[i];
                     const zwCombo = b64ToZwMap[b64Char];
                     if (!zwCombo) {
                         console.error(`Base64字符 '${b64Char}' 没有对应的零宽字符映射`);
@@ -844,8 +1058,8 @@
                 }
                 console.log(`零宽字符消息长度: ${zeroWidthMessage.length}`);
 
-                // 5. 生成简化的喵语文本
-                const result = generateSimpleMeowText(zeroWidthMessage);
+                // 4. 生成喵语文本
+                const result = generateSimpleMeowText(zeroWidthMessage, message.length);
                 console.log(`最终加密结果长度: ${result.length}`);
                 return result;
             } catch (e) {
@@ -854,67 +1068,48 @@
             }
         }
 
-        // 超紧凑加密模式 - 优化的映射（平衡压缩比和可靠性）
-        function encryptMessageUltraCompact(message) {
-            console.log(`使用超紧凑模式加密: "${message}"`);
 
-            // 1. 简单的字符编码，不使用复杂的混淆
-            const encoded = btoa(unescape(encodeURIComponent(message + ":" + VERSION)));
-            console.log(`Base64编码: "${encoded}" (长度: ${encoded.length})`);
 
-            // 2. 使用6位编码（Base64字符只需要6位就够了）
-            const result = PHRASES[0]; // 开头的"喵"
-            let zwPart = "";
+        // 喵语文本生成函数
+        function generateSimpleMeowText(zeroWidthMessage, originalLength) {
+            // 确保短密文也有足够的可见字符
+            const result = generateVisibleTextForShortMessage(zeroWidthMessage, originalLength);
 
-            // Base64字符集索引映射
-            const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
-            for (let i = 0; i < encoded.length; i++) {
-                const char = encoded[i];
-                const charIndex = base64Chars.indexOf(char);
-
-                if (charIndex !== -1) {
-                    // 将索引转换为6位二进制（0-63需要6位）
-                    const binaryStr = charIndex.toString(2).padStart(6, '0');
-                    console.log(`字符 "${char}" (索引${charIndex}) -> 二进制: ${binaryStr}`);
-
-                    for (let j = 0; j < binaryStr.length; j++) {
-                        const bit = binaryStr[j];
-                        // 0 -> 第一个零宽字符，1 -> 第二个零宽字符
-                        zwPart += bit === '0' ? ZERO_WIDTH_CHARS[0] : ZERO_WIDTH_CHARS[1];
-                    }
-                } else {
-                    console.warn(`未知的Base64字符: "${char}"`);
-                    // 使用默认的6位编码
-                    zwPart += ZERO_WIDTH_CHARS[0].repeat(6);
-                }
-            }
-
-            const finalResult = result + zwPart;
-            console.log(`超紧凑模式结果长度: ${finalResult.length}, 压缩比: ${(finalResult.length/message.length).toFixed(2)}:1`);
-
-            return finalResult;
+            return result + zeroWidthMessage;
         }
 
-        // 极度优化的紧凑喵语文本生成 - 最小化输出长度
-        function generateSimpleMeowText(zeroWidthMessage) {
-            // 更新为新的组合长度
-            const COMBO_LENGTH = 2; // 与映射函数保持一致
-            const completeComboCount = Math.floor(zeroWidthMessage.length / COMBO_LENGTH);
-            const usableLength = completeComboCount * COMBO_LENGTH;
-
-            console.log(`零宽字符总长度: ${zeroWidthMessage.length}, 完整组合数: ${completeComboCount}, 可用长度: ${usableLength}`);
-
-            // 极简模式：最少的可见字符，最大化零宽字符密度
+        // 为短消息生成足够的可见字符
+        function generateVisibleTextForShortMessage(zeroWidthMessage, originalLength) {
+            const zwLength = zeroWidthMessage.length;
             let result = "";
 
-            // 只在开头添加一个最短的喵语词
-            result += PHRASES[0]; // "喵"
+            // 计算需要的可见字符数量
+            // 对于短消息，确保至少有3-5个可见字符
+            let minVisibleChars = Math.max(3, Math.min(5, Math.ceil(originalLength / 3)));
 
-            // 直接添加所有零宽字符，不再分段
-            result += zeroWidthMessage.substring(0, usableLength);
+            // 如果零宽字符很少，增加可见字符数量以保持平衡
+            if (zwLength < 20) {
+                minVisibleChars = Math.max(minVisibleChars, 4);
+            }
 
-            console.log(`生成的喵语文本长度: ${result.length}, 零宽字符占比: ${(usableLength/result.length*100).toFixed(1)}%`);
+            // 添加多样化的喵语词汇
+            for (let i = 0; i < minVisibleChars; i++) {
+                if (i === 0) {
+                    // 开头总是用最短的"喵"
+                    result += PHRASES[0];
+                } else {
+                    // 后续使用不同的喵语词汇和标点
+                    if (i % 2 === 1 && PHRASES.length > 1) {
+                        // 奇数位置使用其他喵语词汇
+                        const phraseIndex = (i - 1) % (PHRASES.length - 1) + 1;
+                        result += PHRASES[phraseIndex];
+                    } else {
+                        // 偶数位置使用标点符号
+                        const punctIndex = Math.floor((i - 2) / 2) % PUNCTUATIONS.length;
+                        result += PUNCTUATIONS[punctIndex];
+                    }
+                }
+            }
 
             return result;
         }
@@ -972,15 +1167,10 @@
             return length <= (maxLength || Infinity);
         }
 
-        // 优化后的解密消息函数，提高解密可靠性 - 修复版本，增加调试信息
+        // 统一的解密消息函数
         function decryptMessage(encryptedMessage) {
             try {
                 console.log(`开始解密消息，长度: ${encryptedMessage.length}`);
-
-                // 检测是否为超紧凑模式
-                if (CONFIG.ULTRA_COMPACT_MODE) {
-                    return decryptMessageUltraCompact(encryptedMessage);
-                }
 
                 // 1. 创建Base64到零宽字符的映射
                 const b64ToZwMap = createBase64ToZeroWidthMap();
@@ -990,7 +1180,17 @@
                 for (const [key, value] of Object.entries(b64ToZwMap)) {
                     zwToB64Map[value] = key;
                 }
-                console.log(`创建了 ${Object.keys(zwToB64Map).length} 个反向映射`);
+
+                console.log(`反向映射创建完成: ${Object.keys(zwToB64Map).length} 个映射`);
+
+                // 测试前几个反向映射
+                console.log(`测试反向映射:`);
+                const testKeys = Object.keys(zwToB64Map).slice(0, 3);
+                for (const combo of testKeys) {
+                    const char = zwToB64Map[combo];
+                    const comboDebug = Array.from(combo).map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join('');
+                    console.log(`  ${comboDebug} -> "${char}"`);
+                }
 
                 // 2. 提取所有零宽字符
                 const zeroWidthCharsRegex = new RegExp(`[${ZERO_WIDTH_CHARS.join('')}]`, 'g');
@@ -998,336 +1198,79 @@
                 const zeroWidthOnly = zeroWidthMatches.join('');
 
                 console.log(`提取到 ${zeroWidthOnly.length} 个零宽字符`);
-                console.log(`零宽字符预览: ${Array.from(zeroWidthOnly.substring(0, 12)).map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join(' ')}`);
 
-                // 3. 将零宽字符转回Base64 - 使用固定长度分组
+                // 分析前几个零宽字符
+                console.log(`前几个零宽字符分析:`);
+                for (let i = 0; i < Math.min(9, zeroWidthOnly.length); i++) {
+                    const char = zeroWidthOnly[i];
+                    const code = char.charCodeAt(0).toString(16).padStart(4, '0');
+                    console.log(`  [${i}] \\u${code}`);
+                }
+
+                // 3. 将零宽字符转回Base64
                 let base64Message = "";
-                const COMBO_LENGTH = 2; // 更新为新的组合长度
-
-                // 按固定长度分组处理 - 改进版本，增加错误处理
+                const COMBO_LENGTH = 3; // 3个零宽字符的组合
                 let unmappedCount = 0;
+
                 for (let i = 0; i < zeroWidthOnly.length; i += COMBO_LENGTH) {
                     if (i + COMBO_LENGTH <= zeroWidthOnly.length) {
                         const zwCombo = zeroWidthOnly.substring(i, i + COMBO_LENGTH);
+                        const comboDebug = Array.from(zwCombo).map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join('');
 
                         if (zwCombo in zwToB64Map) {
-                            base64Message += zwToB64Map[zwCombo];
+                            const mappedChar = zwToB64Map[zwCombo];
+                            base64Message += mappedChar;
+
+                            if (Math.floor(i / COMBO_LENGTH) < 3) {
+                                console.log(`[${Math.floor(i/COMBO_LENGTH)}] ${comboDebug} -> "${mappedChar}" ✓`);
+                            }
                         } else {
                             unmappedCount++;
-                            console.warn(`无法找到零宽字符组合的映射 (位置 ${i}): ${Array.from(zwCombo).map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join('')}`);
-
-                            // 尝试查找最相似的映射
-                            let bestMatch = null;
-                            let minDifference = Infinity;
-
-                            for (const [mappedCombo, b64Char] of Object.entries(zwToB64Map)) {
-                                let difference = 0;
-                                for (let j = 0; j < COMBO_LENGTH; j++) {
-                                    if (zwCombo[j] !== mappedCombo[j]) {
-                                        difference++;
-                                    }
-                                }
-                                if (difference < minDifference) {
-                                    minDifference = difference;
-                                    bestMatch = b64Char;
-                                }
+                            if (unmappedCount <= 3) {
+                                console.warn(`[${Math.floor(i/COMBO_LENGTH)}] ${comboDebug} -> 未找到映射 ✗`);
                             }
-
-                            if (bestMatch && minDifference <= 1) { // 降低容错阈值
-                                console.log(`使用最相似的映射: ${bestMatch} (差异: ${minDifference})`);
-                                base64Message += bestMatch;
-                            } else {
-                                console.error(`无法找到合适的替代映射，跳过此组合`);
-                                // 不添加任何字符，这可能导致Base64不完整
-                            }
+                            base64Message += 'A'; // 默认字符
                         }
-                    } else {
-                        // 处理不完整的最后一组
-                        console.warn(`剩余零宽字符长度不足: ${zeroWidthOnly.length - i}`);
-                        break;
                     }
                 }
 
-                console.log(`未映射的组合数量: ${unmappedCount}`);
+                console.log(`映射结果: 成功 ${Math.floor(zeroWidthOnly.length / COMBO_LENGTH) - unmappedCount}, 失败 ${unmappedCount}`);
 
-                console.log(`解析出的Base64字符串长度: ${base64Message.length}`);
-
-                // 4. 修复Base64字符串的填充
+                // 4. 修复Base64填充
                 base64Message = fixBase64Padding(base64Message);
 
-                // 5. 检查Base64格式是否有效
-                console.log(`最终Base64字符串: "${base64Message}"`);
+                // 5. 验证Base64有效性
                 if (!isValidBase64(base64Message)) {
-                    console.error("解析出的Base64字符串无效:", base64Message);
-                    console.log("尝试修复Base64字符串...");
-
-                    // 尝试修复常见的Base64问题
-                    let fixedBase64 = base64Message;
-
-                    // 移除无效字符
-                    fixedBase64 = fixedBase64.replace(/[^A-Za-z0-9+/=]/g, '');
-
-                    // 重新修复填充
-                    fixedBase64 = fixBase64Padding(fixedBase64);
-
-                    console.log(`修复后的Base64: "${fixedBase64}"`);
-
-                    if (isValidBase64(fixedBase64)) {
-                        console.log("Base64修复成功");
-                        base64Message = fixedBase64;
-                    } else {
-                        throw new Error("解密失败：无效的Base64格式，修复失败");
-                    }
+                    console.error("Base64字符串无效:", base64Message);
+                    throw new Error("解密失败：无效的Base64格式");
                 }
 
-                // 6. 将Base64解码回混淆后的消息
-                let scrambledMessage;
+                // 6. 解码Base64
+                let decoded;
                 try {
-                    const decodedData = atob(base64Message);
-                    scrambledMessage = decodeURIComponent(escape(decodedData));
+                    decoded = atob(base64Message);
+                    decoded = decodeURIComponent(escape(decoded));
                 } catch (e) {
-                    console.warn("标准解码方法失败，尝试备用方法:", e);
-
-                    // 备用解码方法，处理非ASCII字符
-                    try {
-                        const bytes = [];
-                        const decodedData = atob(base64Message);
-                        for (let i = 0; i < decodedData.length; i++) {
-                            bytes.push(decodedData.charCodeAt(i));
-                        }
-                        const decoder = new TextDecoder('utf-8');
-                        scrambledMessage = decoder.decode(new Uint8Array(bytes));
-                    } catch (backupError) {
-                        console.error("备用解码方法也失败:", backupError);
-                        throw new Error(`解密失败: 无法解码Base64数据`);
-                    }
+                    console.error("Base64解码失败:", e);
+                    throw new Error("解密失败：Base64解码错误");
                 }
 
-                // 7. 使用解混淆函数还原原始消息
-                return starResonanceUnscramble(scrambledMessage, KEY, SALT);
+                // 7. 移除版本标记
+                const versionMarker = ":" + VERSION;
+                const versionIndex = decoded.lastIndexOf(versionMarker);
+                if (versionIndex !== -1) {
+                    return decoded.substring(0, versionIndex);
+                }
+
+                console.log("未找到版本标记，直接返回解码结果");
+                return decoded;
             } catch (e) {
                 console.error("解密错误详情:", e);
                 throw new Error(`解密失败: ${e.message}`);
             }
         }
 
-        // 超紧凑解密模式 - 优化的反向映射（6位编码）
-        function decryptMessageUltraCompact(encryptedMessage) {
-            try {
-                console.log(`使用超紧凑模式解密，长度: ${encryptedMessage.length}`);
 
-                // 1. 提取零宽字符（跳过开头的"喵"）
-                const zeroWidthCharsRegex = new RegExp(`[${ZERO_WIDTH_CHARS.join('')}]`, 'g');
-                const zeroWidthMatches = encryptedMessage.match(zeroWidthCharsRegex) || [];
-
-                console.log(`提取到 ${zeroWidthMatches.length} 个零宽字符`);
-
-                // 2. 调试零宽字符类型
-                console.log(`零宽字符类型统计:`);
-                const zwTypeCount = {};
-                zeroWidthMatches.forEach(zw => {
-                    const code = zw.charCodeAt(0).toString(16).padStart(4, '0');
-                    zwTypeCount[code] = (zwTypeCount[code] || 0) + 1;
-                });
-                console.log(zwTypeCount);
-
-                // 检查是否只有两种零宽字符
-                const uniqueZwChars = [...new Set(zeroWidthMatches)];
-                console.log(`唯一的零宽字符数量: ${uniqueZwChars.length}`);
-                uniqueZwChars.forEach((zw, index) => {
-                    console.log(`  [${index}] \\u${zw.charCodeAt(0).toString(16).padStart(4, '0')}`);
-                });
-
-                // 3. 将零宽字符序列转回Base64字符
-                let base64Message = "";
-                const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
-
-                console.log(`Base64字符集长度: ${base64Chars.length}`);
-                console.log(`期望的零宽字符: [0]=${ZERO_WIDTH_CHARS[0].charCodeAt(0).toString(16)}, [1]=${ZERO_WIDTH_CHARS[1].charCodeAt(0).toString(16)}`);
-
-                // 每6个零宽字符代表一个Base64字符的索引
-                for (let i = 0; i < zeroWidthMatches.length; i += 6) {
-                    if (i + 5 < zeroWidthMatches.length) {
-                        let binaryStr = "";
-
-                        // 重构6位二进制字符串
-                        for (let j = 0; j < 6; j++) {
-                            const zwChar = zeroWidthMatches[i + j];
-                            // 第一个零宽字符 -> 0，第二个零宽字符 -> 1
-                            if (zwChar === ZERO_WIDTH_CHARS[0]) {
-                                binaryStr += '0';
-                            } else if (zwChar === ZERO_WIDTH_CHARS[1]) {
-                                binaryStr += '1';
-                            } else {
-                                console.warn(`意外的零宽字符[${i+j}]: \\u${zwChar.charCodeAt(0).toString(16).padStart(4, '0')}`);
-                                binaryStr += '0'; // 默认为0
-                            }
-                        }
-
-                        // 将二进制转换为Base64字符索引
-                        const charIndex = parseInt(binaryStr, 2);
-
-                        if (charIndex >= 0 && charIndex < base64Chars.length) {
-                            const char = base64Chars[charIndex];
-                            base64Message += char;
-                            if (i < 30) { // 只显示前几个的详细信息
-                                console.log(`[${Math.floor(i/6)}] 二进制 ${binaryStr} -> 索引 ${charIndex} -> 字符 "${char}"`);
-                            }
-                        } else {
-                            console.warn(`无效的字符索引: ${charIndex}, 超出范围 [0, ${base64Chars.length-1}]`);
-                            base64Message += 'A'; // 默认字符
-                        }
-                    }
-                }
-
-                console.log(`重构的Base64: "${base64Message}" (长度: ${base64Message.length})`);
-
-                // 3. 详细分析重构的Base64
-                console.log(`Base64字符详细分析:`);
-                for (let i = 0; i < Math.min(base64Message.length, 10); i++) {
-                    const char = base64Message[i];
-                    const code = char.charCodeAt(0);
-                    const isValid = /^[A-Za-z0-9+/=]$/.test(char);
-                    console.log(`  [${i}] "${char}" (${code}) 有效: ${isValid}`);
-                }
-
-                // 4. 修复Base64填充
-                if (base64Message.length === 0) {
-                    throw new Error("无法重构Base64字符串");
-                }
-
-                // 检查零宽字符数量是否正确
-                const expectedChars = Math.floor(zeroWidthMatches.length / 6);
-                console.log(`零宽字符数量: ${zeroWidthMatches.length}, 期望的Base64字符数: ${expectedChars}, 实际重构: ${base64Message.length}`);
-
-                base64Message = fixBase64Padding(base64Message);
-                console.log(`修复填充后的Base64: "${base64Message}" (长度: ${base64Message.length})`);
-
-                // 5. 验证Base64有效性
-                if (!isValidBase64(base64Message)) {
-                    console.warn(`Base64无效，详细检查...`);
-
-                    // 检查每个字符
-                    let invalidChars = [];
-                    for (let i = 0; i < base64Message.length; i++) {
-                        const char = base64Message[i];
-                        if (!/^[A-Za-z0-9+/=]$/.test(char)) {
-                            invalidChars.push(`位置${i}: "${char}" (${char.charCodeAt(0)})`);
-                        }
-                    }
-
-                    if (invalidChars.length > 0) {
-                        console.error(`发现无效字符: ${invalidChars.join(', ')}`);
-                    }
-
-                    // 强制清理
-                    base64Message = base64Message.replace(/[^A-Za-z0-9+/=]/g, '');
-                    base64Message = fixBase64Padding(base64Message);
-                    console.log(`强制清理后: "${base64Message}"`);
-
-                    if (!isValidBase64(base64Message)) {
-                        console.error(`清理后仍然无效，Base64长度: ${base64Message.length}`);
-                        throw new Error("Base64字符串无法修复");
-                    }
-                }
-
-                // 7. 尝试解码Base64 - 增强版本
-                let decoded;
-                try {
-                    // 直接尝试解码
-                    decoded = atob(base64Message);
-                    console.log(`Base64解码成功`);
-                } catch (e) {
-                    console.error(`Base64解码失败: ${e.message}`);
-                    console.log(`问题Base64: "${base64Message}"`);
-
-                    // 详细分析每个字符并找出问题
-                    console.log(`字符分析:`);
-                    let cleanBase64 = "";
-                    let hasInvalidChars = false;
-
-                    for (let i = 0; i < base64Message.length; i++) {
-                        const char = base64Message[i];
-                        const code = char.charCodeAt(0);
-
-                        // 检查是否为标准Base64字符
-                        const isStandardBase64 = /^[A-Za-z0-9+/=]$/.test(char);
-                        const isASCII = code >= 32 && code <= 126;
-
-                        console.log(`  [${i}] "${char}" (U+${code.toString(16).padStart(4, '0')}) ASCII: ${isASCII}, Base64: ${isStandardBase64}`);
-
-                        if (isStandardBase64 && isASCII) {
-                            cleanBase64 += char;
-                        } else {
-                            hasInvalidChars = true;
-                            console.log(`    发现无效字符: "${char}" (${code})`);
-
-                            // 根据字符码范围进行智能替换
-                            if (code >= 48 && code <= 57) { // 数字范围
-                                cleanBase64 += char;
-                            } else if (code >= 65 && code <= 90) { // 大写字母范围
-                                cleanBase64 += char;
-                            } else if (code >= 97 && code <= 122) { // 小写字母范围
-                                cleanBase64 += char;
-                            } else {
-                                // 根据位置选择替换字符
-                                const replacements = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
-                                const replacement = replacements[i % replacements.length];
-                                cleanBase64 += replacement;
-                                console.log(`    替换为: "${replacement}"`);
-                            }
-                        }
-                    }
-
-                    if (hasInvalidChars) {
-                        console.log(`发现 ${hasInvalidChars} 个无效字符，已进行替换`);
-                    }
-
-                    console.log(`清理后的Base64: "${cleanBase64}"`);
-
-                    if (cleanBase64.length === 0) {
-                        throw new Error("清理后Base64字符串为空");
-                    }
-
-                    // 重新修复填充
-                    cleanBase64 = fixBase64Padding(cleanBase64);
-                    console.log(`重新修复填充后: "${cleanBase64}"`);
-
-                    try {
-                        decoded = atob(cleanBase64);
-                        console.log(`清理后Base64解码成功`);
-                    } catch (e2) {
-                        console.error(`最终解码失败: ${e2.message}`);
-                        throw new Error(`Base64解码最终失败: ${e2.message}`);
-                    }
-                }
-
-                // 8. 解码结果处理
-                let result;
-                try {
-                    result = decodeURIComponent(escape(decoded));
-                } catch (e) {
-                    // 如果UTF-8解码失败，直接使用原始字符串
-                    result = decoded;
-                }
-                console.log(`解码结果: "${result}" (长度: ${result.length})`);
-
-                // 9. 移除版本标记
-                const versionMarker = ":" + VERSION;
-                const versionIndex = result.lastIndexOf(versionMarker);
-                if (versionIndex !== -1) {
-                    const finalResult = result.substring(0, versionIndex);
-                    console.log(`移除版本标记后: "${finalResult}"`);
-                    return finalResult;
-                }
-
-                console.log(`未找到版本标记，直接返回: "${result}"`);
-                return result;
-            } catch (e) {
-                console.error("超紧凑解密失败:", e);
-                throw new Error(`超紧凑解密失败: ${e.message}`);
-            }
-        }
 
         // 修复Base64填充的辅助函数
         function fixBase64Padding(str) {
@@ -1388,11 +1331,17 @@
             }
         }
 
+        // 清除缓存按钮事件监听器
+        document.getElementById('clear-cache-btn').addEventListener('click', function() {
+            clearMappingCache();
+            alert('映射缓存已清除！下次加密/解密时将重新创建映射表。');
+        });
+
         // 主题切换功能
         document.querySelectorAll('.theme-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                // 如果是配置按钮，不处理主题切换
-                if (this.id === 'config-btn-header') {
+                // 如果是配置按钮或清除缓存按钮，不处理主题切换
+                if (this.id === 'config-btn-header' || this.id === 'clear-cache-btn') {
                     return;
                 }
 
@@ -1406,9 +1355,9 @@
                     document.body.classList.add(theme + '-theme');
                 }
 
-                // 更新按钮状态（排除配置按钮）
+                // 更新按钮状态（排除配置按钮和清除缓存按钮）
                 document.querySelectorAll('.theme-btn').forEach(b => {
-                    if (b.id !== 'config-btn-header') {
+                    if (b.id !== 'config-btn-header' && b.id !== 'clear-cache-btn') {
                         b.classList.remove('active');
                     }
                 });
@@ -1425,9 +1374,9 @@
             document.body.classList.add(savedTheme + '-theme');
         }
 
-        // 设置主题按钮状态（排除配置按钮）
+        // 设置主题按钮状态（排除配置按钮和清除缓存按钮）
         document.querySelectorAll('.theme-btn').forEach(b => {
-            if (b.id !== 'config-btn-header') {
+            if (b.id !== 'config-btn-header' && b.id !== 'clear-cache-btn') {
                 if (b.getAttribute('data-theme') === savedTheme) {
                     b.classList.add('active');
                 } else {
@@ -1436,9 +1385,11 @@
             }
         });
 
-        // 确保DOM完全加载后再加载配置
+        // 确保DOM完全加载后再加载配置和初始化调试面板
         document.addEventListener('DOMContentLoaded', function() {
+            clearMappingCache(); // 清除映射缓存，确保使用最新的映射算法
             loadConfig();
+            initializeDebugPanel();
         });
 
         // 配置对话框事件监听器
@@ -1698,207 +1649,151 @@
             );
         });
 
-        // 添加调试按钮和面板
-        document.querySelector('.container').insertAdjacentHTML('beforeend', `
-            <div class="debug-panel">
-                <h3>调试工具</h3>
-                <button id="debug-btn">显示调试信息</button>
-                <div id="debug-info"></div>
-            </div>
-        `);
+        // 初始化调试面板
+        function initializeDebugPanel() {
+            // 添加调试按钮和面板
+            const container = document.querySelector('.container');
+            if (container && !document.getElementById('debug-btn')) {
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="debug-panel">
+                        <h3>调试工具</h3>
+                        <div class="debug-controls">
+                            <button id="debug-btn">系统调试</button>
+                            <button id="test-mapping-btn">映射测试</button>
+                            <button id="test-full-btn">完整测试</button>
+                            <button id="clear-debug-btn">清除结果</button>
+                        </div>
 
-        // 调试按钮点击事件
-        document.getElementById('debug-btn').addEventListener('click', async function() {
-            const debugInfo = document.getElementById('debug-info');
-            if (debugInfo.style.display === 'none') {
-                // 收集调试信息
-                let info = "";
-                
-                // 1. 显示关键参数（显示当前实际使用的配置）
-                info += "=== 关键参数 ===\n";
-                info += `VERSION: ${CONFIG.VERSION}\n`;
-                info += `KEY: ${CONFIG.KEY}\n`;
-                info += `SALT: ${CONFIG.SALT}\n`;
-                info += `PHRASES: [${CONFIG.PHRASES.join(', ')}]\n`;
-                info += `PUNCTUATIONS: [${CONFIG.PUNCTUATIONS.join(', ')}]\n\n`;
-                
-                // 2. 测试零宽字符映射一致性
-                info += "=== 零宽字符映射一致性测试 ===\n";
-                const testChar = 'A';
-                const b64ToZwMap = createBase64ToZeroWidthMap();
-                const zwEncoded = b64ToZwMap[testChar];
-                
-                // 创建反向映射
-                const zwToB64Map = {};
-                for (const [key, value] of Object.entries(b64ToZwMap)) {
-                    zwToB64Map[value] = key;
-                }
-                
-                const b64Decoded = zwToB64Map[zwEncoded];
-                
-                info += `测试字符: '${testChar}'\n`;
-                info += `编码为零宽字符: [${Array.from(zwEncoded).map(c => '\\u' + c.charCodeAt(0).toString(16).padStart(4, '0')).join(', ')}]\n`;
-                info += `解码回Base64: '${b64Decoded}'\n`;
-                info += `映射一致性: ${testChar === b64Decoded ? '✓ 正常' : '✗ 错误'}\n\n`;
-                
-                // 3. 测试加密解密一致性
-                info += "=== 加密解密一致性测试 ===\n";
-                const testMessage = "测试消息123";
+                        <div id="debug-results" style="margin-top: 15px;">
+                            <div id="system-debug" class="debug-section" style="display: none;">
+                                <h4>系统调试信息</h4>
+                                <pre id="system-debug-content"></pre>
+                            </div>
 
-                try {
-                    // 直接测试混淆函数（使用当前配置）
-                    const scrambled = starResonanceScramble(testMessage, CONFIG.KEY, CONFIG.SALT);
-                    info += `原始消息: "${testMessage}" (长度: ${testMessage.length})\n`;
-                    info += `混淆后长度: ${scrambled.length}\n`;
-                    info += `混淆后预览: "${scrambled.substring(0, 30)}${scrambled.length > 30 ? '...' : ''}"\n`;
+                            <div id="mapping-test" class="debug-section" style="display: none;">
+                                <h4>映射测试结果</h4>
+                                <div id="mapping-test-status"></div>
+                                <pre id="mapping-test-content"></pre>
+                            </div>
 
-                    // 分析混淆后的字符分布
-                    const charTypes = {
-                        ascii: 0,
-                        chinese: 0,
-                        special: 0,
-                        control: 0
+                            <div id="full-test" class="debug-section" style="display: none;">
+                                <h4>完整加密解密测试</h4>
+                                <div id="full-test-status"></div>
+                                <pre id="full-test-content"></pre>
+                            </div>
+                        </div>
+                    </div>
+                `);
+
+                // 清除调试结果按钮
+                document.getElementById('clear-debug-btn').addEventListener('click', function() {
+                    document.getElementById('system-debug').style.display = 'none';
+                    document.getElementById('mapping-test').style.display = 'none';
+                    document.getElementById('full-test').style.display = 'none';
+                });
+
+                // 测试映射按钮点击事件
+                document.getElementById('test-mapping-btn').addEventListener('click', function() {
+                    const section = document.getElementById('mapping-test');
+                    const status = document.getElementById('mapping-test-status');
+                    const content = document.getElementById('mapping-test-content');
+
+                    section.style.display = 'block';
+                    status.innerHTML = '正在测试...';
+                    content.textContent = '';
+
+                    // 重定向console.log到调试面板
+                    const originalLog = console.log;
+                    const logs = [];
+                    console.log = function(...args) {
+                        logs.push(args.join(' '));
+                        originalLog.apply(console, args);
                     };
 
-                    for (let i = 0; i < scrambled.length; i++) {
-                        const code = scrambled.charCodeAt(i);
-                        if (code < 128) {
-                            charTypes.ascii++;
-                        } else if (code >= 0x4e00 && code <= 0x9fff) {
-                            charTypes.chinese++;
-                        } else if (code < 32 || code === 127) {
-                            charTypes.control++;
-                        } else {
-                            charTypes.special++;
-                        }
+                    try {
+                        const result = testMapping();
+                        status.innerHTML = `<span class="${result ? 'status-success' : 'status-error'}">${result ? '✅ 测试通过' : '❌ 测试失败'}</span>`;
+                        content.textContent = logs.join('\n');
+                    } catch (e) {
+                        status.innerHTML = `<span class="status-error">❌ 测试出错: ${e.message}</span>`;
+                    } finally {
+                        console.log = originalLog;
                     }
+                });
 
-                    info += `字符分布 - ASCII: ${charTypes.ascii}, 中文: ${charTypes.chinese}, 特殊: ${charTypes.special}, 控制: ${charTypes.control}\n`;
+                // 完整测试按钮点击事件
+                document.getElementById('test-full-btn').addEventListener('click', function() {
+                    const section = document.getElementById('full-test');
+                    const status = document.getElementById('full-test-status');
+                    const content = document.getElementById('full-test-content');
+
+                    section.style.display = 'block';
+                    status.innerHTML = '正在测试...';
+                    content.textContent = '';
+
+                    // 重定向console.log到调试面板
+                    const originalLog = console.log;
+                    const originalError = console.error;
+                    const logs = [];
+                    console.log = function(...args) {
+                        logs.push(args.join(' '));
+                        originalLog.apply(console, args);
+                    };
+                    console.error = function(...args) {
+                        logs.push('ERROR: ' + args.join(' '));
+                        originalError.apply(console, args);
+                    };
 
                     try {
-                        const unscrambled = starResonanceUnscramble(scrambled, CONFIG.KEY, CONFIG.SALT);
-                        info += `解混淆后: "${unscrambled}" (长度: ${unscrambled.length})\n`;
-                        info += `一致性: ${testMessage === unscrambled ? '✓ 正常' : '✗ 错误'}\n`;
-
-                        if (testMessage !== unscrambled) {
-                            info += `差异分析: `;
-                            for (let i = 0; i < Math.max(testMessage.length, unscrambled.length); i++) {
-                                if (testMessage[i] !== unscrambled[i]) {
-                                    info += `位置${i}: "${testMessage[i] || 'null'}" vs "${unscrambled[i] || 'null'}" `;
-                                }
-                            }
-                            info += `\n`;
-                        }
-                        info += `\n`;
+                        const result = testFullEncryptDecrypt();
+                        status.innerHTML = `<span class="${result ? 'status-success' : 'status-error'}">${result ? '✅ 测试通过' : '❌ 测试失败'}</span>`;
+                        content.textContent = logs.join('\n');
                     } catch (e) {
-                        info += `解混淆失败: ${e.message}\n`;
-                        info += `错误类型: ${e.constructor.name}\n\n`;
+                        status.innerHTML = `<span class="status-error">❌ 测试出错: ${e.message}</span>`;
+                    } finally {
+                        console.log = originalLog;
+                        console.error = originalError;
                     }
+                });
 
-                    // 4. 测试完整的加密解密流程（包含详细调试）
-                    info += "=== 完整加密解密流程测试 ===\n";
+                // 系统调试按钮点击事件
+                document.getElementById('debug-btn').addEventListener('click', async function() {
+                    const section = document.getElementById('system-debug');
+                    const content = document.getElementById('system-debug-content');
 
-                    // 加密消息
-                    const startTime = performance.now();
-                    const encrypted1 = encryptMessage(testMessage);
-                    const encryptTime = performance.now() - startTime;
+                    section.style.display = 'block';
+                    // 收集系统调试信息
+                    let info = "";
 
-                    info += `加密耗时: ${encryptTime.toFixed(2)}ms\n`;
-                    info += `加密结果长度: ${encrypted1.length}\n`;
-                    info += `压缩比: ${(encrypted1.length / testMessage.length).toFixed(2)}:1\n`;
-                    info += `加密结果预览: "${encrypted1.substring(0, 50)}${encrypted1.length > 50 ? '...' : ''}"\n`;
+                    // 1. 显示关键参数
+                    info += "=== 系统配置 ===\n";
+                    info += `VERSION: ${CONFIG.VERSION}\n`;
+                    info += `KEY: ${CONFIG.KEY.substring(0, 10)}...\n`;
+                    info += `SALT: ${CONFIG.SALT.substring(0, 10)}...\n`;
+                    info += `PHRASES: [${CONFIG.PHRASES.join(', ')}]\n`;
+                    info += `PUNCTUATIONS: [${CONFIG.PUNCTUATIONS.join(', ')}]\n\n`;
 
-                    // 分析零宽字符
-                    const zeroWidthCharsRegex = new RegExp(`[${ZERO_WIDTH_CHARS.join('')}]`, 'g');
-                    const zeroWidthMatches = encrypted1.match(zeroWidthCharsRegex) || [];
-                    const visibleChars = encrypted1.replace(zeroWidthCharsRegex, '');
-
-                    info += `零宽字符数量: ${zeroWidthMatches.length}\n`;
-                    info += `可见字符数量: ${visibleChars.length}\n`;
-                    info += `零宽字符占比: ${(zeroWidthMatches.length / encrypted1.length * 100).toFixed(1)}%\n`;
-                    info += `零宽字符长度是否为2的倍数: ${zeroWidthMatches.length % 2 === 0 ? '✓ 是' : '✗ 否'}\n`;
-
-                    // 分析零宽字符类型分布
-                    const zwTypeCount = {};
-                    zeroWidthMatches.forEach(char => {
-                        const code = '\\u' + char.charCodeAt(0).toString(16).padStart(4, '0');
-                        zwTypeCount[code] = (zwTypeCount[code] || 0) + 1;
+                    // 2. 零宽字符信息
+                    info += "=== 零宽字符配置 ===\n";
+                    info += `零宽字符数量: ${ZERO_WIDTH_CHARS.length}\n`;
+                    info += `零宽字符列表:\n`;
+                    ZERO_WIDTH_CHARS.forEach((char, index) => {
+                        const code = char.charCodeAt(0).toString(16).padStart(4, '0');
+                        info += `  [${index}] \\u${code}\n`;
                     });
-                    info += `零宽字符类型分布: ${Object.entries(zwTypeCount).map(([type, count]) => `${type}:${count}`).join(', ')}\n`;
+                    info += `\n`;
 
-                    // 详细调试过程
-                    try {
-                        // 测试Base64重构过程
-                        const b64ToZwMap = createBase64ToZeroWidthMap();
-                        const zwToB64Map = {};
-                        for (const [key, value] of Object.entries(b64ToZwMap)) {
-                            zwToB64Map[value] = key;
-                        }
-
-                        const zeroWidthOnly = zeroWidthMatches.join('');
-                        info += `提取的零宽字符长度: ${zeroWidthOnly.length}\n`;
-
-                        let base64Reconstructed = "";
-                        let unmappedCount = 0;
-                        for (let i = 0; i < zeroWidthOnly.length; i += 2) {
-                            if (i + 2 <= zeroWidthOnly.length) {
-                                const combo = zeroWidthOnly.substring(i, i + 2);
-                                if (combo in zwToB64Map) {
-                                    base64Reconstructed += zwToB64Map[combo];
-                                } else {
-                                    unmappedCount++;
-                                }
-                            }
-                        }
-
-                        info += `重构的Base64长度: ${base64Reconstructed.length}\n`;
-                        info += `重构的Base64内容: "${base64Reconstructed}"\n`;
-                        info += `未映射的组合数: ${unmappedCount}\n`;
-
-                        // 修复Base64填充
-                        const fixedBase64 = fixBase64Padding(base64Reconstructed);
-                        info += `修复后的Base64: "${fixedBase64}"\n`;
-                        info += `Base64有效性: ${isValidBase64(fixedBase64) ? '✓ 有效' : '✗ 无效'}\n`;
-
-                        // 解密过程
-                        info += "--- 解密过程 ---\n";
-                        const decryptStartTime = performance.now();
-                        const decrypted1 = decryptMessage(encrypted1);
-                        const decryptTime = performance.now() - decryptStartTime;
-
-                        info += `解密耗时: ${decryptTime.toFixed(2)}ms\n`;
-                        info += `解密结果: "${decrypted1}"\n`;
-                        info += `解密结果长度: ${decrypted1.length}\n`;
-                        info += `解密一致性: ${testMessage === decrypted1 ? '✓ 正常' : '✗ 错误'}\n`;
-                        info += `总耗时: ${(encryptTime + decryptTime).toFixed(2)}ms\n`;
-
-                        if (testMessage !== decrypted1) {
-                            info += `长度对比: 原始${testMessage.length} vs 解密${decrypted1.length}\n`;
-                            info += `字符对比: `;
-                            for (let i = 0; i < Math.max(testMessage.length, decrypted1.length); i++) {
-                                if (testMessage[i] !== decrypted1[i]) {
-                                    info += `[${i}]"${testMessage[i] || '∅'}"≠"${decrypted1[i] || '∅'}" `;
-                                }
-                            }
-                            info += `\n`;
-                        }
-
-                    } catch (e) {
-                        info += `解密失败: ${e.message}\n`;
+                    // 3. 映射表状态
+                    info += "=== 映射表状态 ===\n";
+                    info += `映射缓存状态: ${GLOBAL_MAPPING_CACHE ? '已缓存' : '未缓存'}\n`;
+                    if (GLOBAL_MAPPING_CACHE) {
+                        info += `映射数量: ${Object.keys(GLOBAL_MAPPING_CACHE).length}\n`;
                     }
-                } catch (e) {
-                    info += `测试过程出错: ${e.message}\n`;
-                }
-                
-                // 显示调试信息
-                debugInfo.textContent = info;
-                debugInfo.style.display = 'block';
-                this.textContent = '隐藏调试信息';
-            } else {
-                debugInfo.style.display = 'none';
-                this.textContent = '显示调试信息';
+
+                    content.textContent = info;
+                });
             }
-        });
+        }
     </script>
 </body>
 </html>
